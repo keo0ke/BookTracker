@@ -38,11 +38,12 @@
     <string name="book_detail_back">← Назад</string>
     <string name="book_detail_title_placeholder">Название книги</string>
     <string name="book_detail_author_placeholder">Автор</string>
-    <string name="book_detail_meta_placeholder">Жанр · год</string>
+    <string name="book_description_section">Описание</string>
     <string name="book_progress_section">Прогресс</string>
     <string name="book_progress_log">Лог сессии</string>
     <string name="book_progress_pct_placeholder">—</string>
     <string name="book_progress_empty_hint">Укажите текущую страницу и объём — здесь появятся проценты и средний темп.</string>
+    <string name="book_progress_hint_with_pages">Всего %d стр. — укажите текущую страницу, чтобы увидеть прогресс.</string>
     <string name="book_vocab_section">Словарь этой книги</string>
     <string name="book_vocab_open">Открыть</string>
     <string name="book_vocab_description">Слова из выбранной книги можно собирать во время чтения — они автоматически попадут и в общий словарь приложения.</string>
@@ -61,4 +62,20 @@
     <string name="fab_add_content_description">Добавить</string>
 
     <string name="placeholder_screen_soon">Экран в разработке</string>
+
+    <!-- Добавление книги -->
+    <string name="add_book_title">Новая книга</string>
+    <string name="add_book_field_title">Название</string>
+    <string name="add_book_field_author">Автор</string>
+    <string name="add_book_field_isbn">ISBN</string>
+    <string name="add_book_field_pages">Количество страниц</string>
+    <string name="add_book_field_description">Описание</string>
+    <string name="add_book_shelf_label">ПОЛКА</string>
+    <string name="add_book_cover_label">Обложка</string>
+    <string name="add_book_cover_description">Обложка книги</string>
+    <string name="add_book_field_required">Обязательное поле</string>
+    <string name="add_book_save">Сохранить</string>
+
+    <!-- Библиотека — карточка книги -->
+    <string name="library_book_pages">%d стр.</string>
 </resources>
