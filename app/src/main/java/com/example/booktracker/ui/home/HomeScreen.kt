@@ -35,11 +35,10 @@ import com.example.booktracker.R
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
 import com.example.booktracker.ui.theme.Ink
+import com.example.booktracker.ui.theme.RadiusMd
+import com.example.booktracker.ui.theme.RadiusSm
 import com.example.booktracker.ui.theme.Sage
 import com.example.booktracker.ui.theme.Slate
-
-private val RadiusSm = 14.dp
-private val RadiusMd = 22.dp
 
 @Composable
 fun HomeScreen(

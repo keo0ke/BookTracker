@@ -39,13 +39,13 @@ import com.example.booktracker.R
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
 import com.example.booktracker.ui.theme.Ink
+import com.example.booktracker.ui.theme.RadiusMd
+import com.example.booktracker.ui.theme.RadiusPill
+import com.example.booktracker.ui.theme.RadiusSm
 import com.example.booktracker.ui.theme.Sage
 import com.example.booktracker.ui.theme.Slate
 import com.example.booktracker.ui.theme.TealSoft
 
-private val RadiusSm = 14.dp
-private val RadiusMd = 22.dp
-private val RadiusPill = 50.dp
 private val CoverWidth = 120.dp
 private val CoverHeight = 180.dp
 
