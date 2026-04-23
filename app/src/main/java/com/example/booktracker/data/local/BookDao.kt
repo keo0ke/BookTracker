@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.booktracker.data.model.Book
-import com.example.booktracker.data.model.BookShelf
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,7 +16,7 @@ interface BookDao {
     fun observeAll(): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE shelf = :shelf ORDER BY createdAt DESC")
-    fun observeByShelf(shelf: BookShelf): Flow<List<Book>>
+    fun observeByShelf(shelf: String): Flow<List<Book>>
 
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getById(id: String): Book?

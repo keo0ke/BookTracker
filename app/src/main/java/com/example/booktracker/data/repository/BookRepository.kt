@@ -9,7 +9,7 @@ class BookRepository(private val dao: BookDao) {
 
     fun observeAllBooks(): Flow<List<Book>> = dao.observeAll()
 
-    fun observeReadingBooks(): Flow<List<Book>> = dao.observeByShelf(BookShelf.READING)
+    fun observeReadingBooks(): Flow<List<Book>> = dao.observeByShelf(BookShelf.READING.name)
 
     suspend fun getBook(id: String): Book? = dao.getById(id)
 

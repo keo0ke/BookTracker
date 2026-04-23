@@ -24,7 +24,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,13 +31,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.booktracker.R
 import com.example.booktracker.data.model.Book
-import com.example.booktracker.data.model.BookShelf
 import com.example.booktracker.ui.common.CoverImage
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
@@ -53,6 +50,7 @@ import com.example.booktracker.ui.theme.TealSoft
 fun HomeScreen(
     readingBooks: List<Book>,
     onOpenBook: (Book) -> Unit,
+    onAddBook: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
@@ -91,6 +89,7 @@ fun HomeScreen(
                     )
                 } else {
                     ContinueReadingEmptyCard(
+                        onAddBook = onAddBook,
                         modifier = Modifier.padding(horizontal = 20.dp),
                     )
                 }
@@ -115,27 +114,7 @@ fun HomeScreen(
             }
         }
 
-        item {
-            StatChipsRow(
-                modifier = Modifier.padding(horizontal = 20.dp),
-            )
-        }
-
-        item {
-            VocabularyPromoCard(
-                modifier = Modifier.padding(horizontal = 20.dp),
-            )
-        }
-
-        item {
-            RecentSessionsEmptyCard(
-                modifier = Modifier.padding(horizontal = 20.dp),
-            )
-        }
-
-        item {
-            Spacer(Modifier.height(88.dp))
-        }
+        item { Spacer(Modifier.height(88.dp)) }
     }
 }
 
@@ -172,17 +151,9 @@ private fun ContinueReadingCard(
                 .clip(RoundedCornerShape(RadiusSm))
 
             if (book.coverUri != null) {
-                CoverImage(
-                    uri = book.coverUri,
-                    modifier = coverModifier,
-                    contentDescription = book.title,
-                )
+                CoverImage(uri = book.coverUri, modifier = coverModifier, contentDescription = book.title)
             } else {
-                Box(
-                    modifier = coverModifier.background(
-                        Brush.linearGradient(listOf(Ink, Accent)),
-                    ),
-                )
+                Box(modifier = coverModifier.background(Brush.linearGradient(listOf(Ink, Accent))))
             }
 
             Column(modifier = Modifier.weight(1f)) {
@@ -222,12 +193,7 @@ private fun ContinueReadingCard(
                 )
 
                 val progressText = if (book.pageCount != null && book.pageCount > 0) {
-                    stringResource(
-                        R.string.home_continue_progress,
-                        progressPercent,
-                        book.currentPage,
-                        book.pageCount,
-                    )
+                    stringResource(R.string.home_continue_progress, progressPercent, book.currentPage, book.pageCount)
                 } else {
                     stringResource(R.string.home_continue_no_pages)
                 }
@@ -269,17 +235,9 @@ private fun ReadingBookCompactCard(
                 .clip(RoundedCornerShape(8.dp))
 
             if (book.coverUri != null) {
-                CoverImage(
-                    uri = book.coverUri,
-                    modifier = coverModifier,
-                    contentDescription = book.title,
-                )
+                CoverImage(uri = book.coverUri, modifier = coverModifier, contentDescription = book.title)
             } else {
-                Box(
-                    modifier = coverModifier.background(
-                        Brush.linearGradient(listOf(Ink, Accent)),
-                    ),
-                )
+                Box(modifier = coverModifier.background(Brush.linearGradient(listOf(Ink, Accent))))
             }
 
             Column(modifier = Modifier.weight(1f)) {
@@ -303,7 +261,7 @@ private fun ReadingBookCompactCard(
 }
 
 @Composable
-private fun ContinueReadingEmptyCard(modifier: Modifier = Modifier) {
+private fun ContinueReadingEmptyCard(onAddBook: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(RadiusMd),
@@ -312,21 +270,17 @@ private fun ContinueReadingEmptyCard(modifier: Modifier = Modifier) {
         border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Box(
-                modifier =
-                    Modifier
-                        .width(72.dp)
-                        .height(108.dp)
-                        .clip(RoundedCornerShape(RadiusSm))
-                        .background(
-                            Brush.linearGradient(listOf(Ink, Accent)),
-                        ),
+                modifier = Modifier
+                    .width(72.dp)
+                    .height(108.dp)
+                    .clip(RoundedCornerShape(RadiusSm))
+                    .background(Brush.linearGradient(listOf(Ink, Accent))),
             )
 
             Column(modifier = Modifier.weight(1f)) {
@@ -341,154 +295,23 @@ private fun ContinueReadingEmptyCard(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp),
                 )
-            }
-        }
-    }
-}
 
-@Composable
-private fun StatChipsRow(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        StatChip(
-            value = stringResource(R.string.home_stat_placeholder),
-            label = stringResource(R.string.home_stat_streak_label),
-            modifier = Modifier.weight(1f),
-        )
-        StatChip(
-            value = stringResource(R.string.home_stat_placeholder),
-            label = stringResource(R.string.home_stat_pages_label),
-            modifier = Modifier.weight(1f),
-        )
-    }
-}
+                Spacer(Modifier.height(12.dp))
 
-@Composable
-private fun StatChip(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(RadiusMd),
-        colors = CardDefaults.cardColors(containerColor = Sage),
-        border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun VocabularyPromoCard(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(RadiusMd),
-        colors = CardDefaults.cardColors(containerColor = Sage),
-        border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.home_vocab_title),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Slate,
-                )
-                TextButton(onClick = {}) {
-                    Text(
-                        text = stringResource(R.string.home_vocab_all_words),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Accent,
-                    )
-                }
-            }
-
-            Text(
-                text = stringResource(R.string.home_vocab_empty_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
-            )
-
-            Button(
-                onClick = {},
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(RadiusMd),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = Slate,
+                Button(
+                    onClick = onAddBook,
+                    shape = RoundedCornerShape(RadiusMd),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Accent,
                         contentColor = Sage,
                     ),
-            ) {
-                Text(stringResource(R.string.home_vocab_study_cta))
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecentSessionsEmptyCard(modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(RadiusMd),
-        colors = CardDefaults.cardColors(containerColor = Sage),
-        border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.home_sessions_title),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                TextButton(onClick = {}) {
+                ) {
                     Text(
-                        text = stringResource(R.string.home_sessions_all),
+                        text = stringResource(R.string.home_continue_empty_cta),
                         style = MaterialTheme.typography.labelLarge,
-                        color = Accent,
                     )
                 }
             }
-
-            Text(
-                text = stringResource(R.string.home_sessions_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                textAlign = TextAlign.Center,
-            )
         }
     }
 }
@@ -504,10 +327,11 @@ private fun HomeScreenPreview() {
                     author = "М. Булгаков",
                     pageCount = 480,
                     currentPage = 124,
-                    shelf = BookShelf.READING,
+                    shelf = "READING",
                 ),
             ),
             onOpenBook = {},
+            onAddBook = {},
         )
     }
 }
@@ -516,6 +340,6 @@ private fun HomeScreenPreview() {
 @Composable
 private fun HomeScreenEmptyPreview() {
     BookTrackerTheme {
-        HomeScreen(readingBooks = emptyList(), onOpenBook = {})
+        HomeScreen(readingBooks = emptyList(), onOpenBook = {}, onAddBook = {})
     }
 }

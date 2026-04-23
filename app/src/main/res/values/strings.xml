@@ -10,20 +10,8 @@
     <string name="home_continue_no_pages">Укажите кол-во страниц для отслеживания</string>
     <string name="home_also_reading">Также в чтении</string>
     <string name="home_continue_empty_title">Нет книги в чтении</string>
-    <string name="home_continue_empty_hint">Добавьте книгу в библиотеке, чтобы видеть прогресс здесь.</string>
-
-    <string name="home_stat_streak_label">дней подряд</string>
-    <string name="home_stat_pages_label">стр. в этом месяце</string>
-    <string name="home_stat_placeholder">—</string>
-
-    <string name="home_vocab_title">Словарь</string>
-    <string name="home_vocab_all_words">Все слова</string>
-    <string name="home_vocab_empty_description">Здесь появятся карточки для запоминания слов из ваших книг, когда вы начнёте добавлять их.</string>
-    <string name="home_vocab_study_cta">Учить</string>
-
-    <string name="home_sessions_title">Недавние сессии</string>
-    <string name="home_sessions_all">Все</string>
-    <string name="home_sessions_empty">Пока нет записей о чтении.</string>
+    <string name="home_continue_empty_hint">Добавьте книгу, чтобы видеть прогресс здесь.</string>
+    <string name="home_continue_empty_cta">Добавить книгу</string>
 
     <!-- Библиотека -->
     <string name="library_title">Мои книги</string>
@@ -31,31 +19,22 @@
     <string name="library_tab_finished">Прочитано</string>
     <string name="library_tab_wish">Хочу</string>
     <string name="library_empty_reading_title">Пока нечего читать</string>
-    <string name="library_empty_reading_body">Добавьте книгу — обложки появятся сеткой по три в ряд.</string>
+    <string name="library_empty_reading_body">Добавьте книгу — обложки появятся здесь.</string>
     <string name="library_empty_finished_title">Нет прочитанных книг</string>
     <string name="library_empty_finished_body">Когда закончите чтение, отметьте книгу прочитанной — она окажется в этом разделе.</string>
     <string name="library_empty_wish_title">Список желаний пуст</string>
     <string name="library_empty_wish_body">Добавляйте сюда книги, которые планируете прочитать позже.</string>
     <string name="library_link_book_detail">Карточка книги</string>
+    <string name="library_book_pages">%d стр.</string>
 
     <!-- Карточка книги -->
     <string name="book_detail_back">← Назад</string>
-    <string name="book_detail_title_placeholder">Название книги</string>
-    <string name="book_detail_author_placeholder">Автор</string>
-    <string name="book_detail_meta_placeholder">Жанр · год</string>
+    <string name="book_description_section">Описание</string>
     <string name="book_progress_section">Прогресс</string>
-    <string name="book_progress_log">Лог сессии</string>
-    <string name="book_progress_pct_placeholder">—</string>
     <string name="book_progress_empty_hint">Укажите текущую страницу и объём — здесь появятся проценты и средний темп.</string>
-    <string name="book_vocab_section">Словарь этой книги</string>
-    <string name="book_vocab_open">Открыть</string>
-    <string name="book_vocab_description">Слова из выбранной книги можно собирать во время чтения — они автоматически попадут и в общий словарь приложения.</string>
-    <string name="book_vocab_empty_words">Слов пока нет</string>
-    <string name="book_vocab_add_word">Добавить слово</string>
-    <string name="book_vocab_study_set">Учить набор</string>
-    <string name="book_notes_section">Заметки</string>
-    <string name="book_notes_add">+</string>
-    <string name="book_notes_empty">Заметок пока нет — добавьте мысли и цитаты по ходу чтения.</string>
+    <string name="book_progress_hint_with_pages">Всего %d стр. — укажите текущую страницу, чтобы увидеть прогресс.</string>
+    <string name="book_start_reading">Начать читать</string>
+    <string name="book_already_reading">Вы читаете эту книгу</string>
 
     <string name="nav_home">Главная</string>
     <string name="nav_library">Библиотека</string>
@@ -65,4 +44,17 @@
     <string name="fab_add_content_description">Добавить</string>
 
     <string name="placeholder_screen_soon">Экран в разработке</string>
+
+    <!-- Добавление книги -->
+    <string name="add_book_title">Новая книга</string>
+    <string name="add_book_field_title">Название</string>
+    <string name="add_book_field_author">Автор</string>
+    <string name="add_book_field_isbn">ISBN</string>
+    <string name="add_book_field_pages">Количество страниц</string>
+    <string name="add_book_field_description">Описание</string>
+    <string name="add_book_shelf_label">ПОЛКА</string>
+    <string name="add_book_cover_label">Обложка</string>
+    <string name="add_book_cover_description">Обложка книги</string>
+    <string name="add_book_field_required">Обязательное поле</string>
+    <string name="add_book_save">Сохранить</string>
 </resources>
