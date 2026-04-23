@@ -5,6 +5,10 @@
     <string name="home_today">Сегодня</string>
     <string name="home_greeting">Добро пожаловать — хорошего чтения.</string>
 
+    <string name="home_continue_label">Продолжить чтение</string>
+    <string name="home_continue_progress">%1$d%%  ·  %2$d из %3$d стр.</string>
+    <string name="home_continue_no_pages">Укажите кол-во страниц для отслеживания</string>
+    <string name="home_also_reading">Также в чтении</string>
     <string name="home_continue_empty_title">Нет книги в чтении</string>
     <string name="home_continue_empty_hint">Добавьте книгу в библиотеке, чтобы видеть прогресс здесь.</string>
 
