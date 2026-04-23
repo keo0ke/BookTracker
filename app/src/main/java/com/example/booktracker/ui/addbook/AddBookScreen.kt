@@ -246,7 +246,7 @@ fun AddBookScreen(
                                 coverUri = coverUri,
                                 pageCount = pageCount.toIntOrNull(),
                                 description = description.trim().ifBlank { null },
-                                shelf = BookShelf.entries[selectedShelf],
+                                shelf = BookShelf.entries[selectedShelf].name,
                             ),
                         )
                     }

@@ -59,7 +59,7 @@ fun LibraryScreen(
 ) {
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
     val shelf = BookShelf.entries[selectedIndex]
-    val shelfBooks = books.filter { it.shelf == shelf }
+    val shelfBooks = books.filter { it.bookShelf == shelf }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
