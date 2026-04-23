@@ -14,14 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,36 +29,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.booktracker.R
-import com.example.booktracker.data.model.Book
-import com.example.booktracker.data.model.BookShelf
-import com.example.booktracker.ui.common.CoverImage
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
 import com.example.booktracker.ui.theme.Ink
 import com.example.booktracker.ui.theme.RadiusMd
 import com.example.booktracker.ui.theme.RadiusPill
-import com.example.booktracker.ui.theme.RadiusSm
 import com.example.booktracker.ui.theme.Sage
-import com.example.booktracker.ui.theme.Slate
+
+private enum class LibraryShelf {
+    READING,
+    FINISHED,
+    WISH,
+}
 
 @Composable
 fun LibraryScreen(
-    books: List<Book>,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onOpenBookDetail: (Book) -> Unit = {},
+    onOpenBookDetail: () -> Unit = {},
+    showBookDetailShortcut: Boolean = false,
 ) {
     var selectedIndex by rememberSaveable { mutableIntStateOf(0) }
-    val shelf = BookShelf.entries[selectedIndex]
-    val shelfBooks = books.filter { it.shelf == shelf }
+    val shelf = LibraryShelf.entries[selectedIndex]
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -82,20 +79,25 @@ fun LibraryScreen(
             }
         }
 
-        if (shelfBooks.isEmpty()) {
+        item {
+            LibraryEmptyState(
+                shelf = shelf,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
+
+        if (showBookDetailShortcut) {
             item {
-                LibraryEmptyState(
-                    shelf = shelf,
+                TextButton(
+                    onClick = onOpenBookDetail,
                     modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
-        } else {
-            items(shelfBooks, key = { it.id }) { book ->
-                BookCard(
-                    book = book,
-                    onClick = { onOpenBookDetail(book) },
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.library_link_book_detail),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Accent,
+                    )
+                }
             }
         }
 
@@ -106,88 +108,21 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun BookCard(
-    book: Book,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(RadiusMd),
-        colors = CardDefaults.cardColors(containerColor = Sage),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            val coverModifier =
-                Modifier
-                    .width(56.dp)
-                    .height(84.dp)
-                    .clip(RoundedCornerShape(RadiusSm))
-
-            if (book.coverUri != null) {
-                CoverImage(
-                    uri = book.coverUri,
-                    modifier = coverModifier,
-                )
-            } else {
-                Box(
-                    modifier = coverModifier.background(Brush.linearGradient(listOf(Ink, Accent))),
-                )
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = book.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = book.author,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (book.pageCount != null) {
-                    Text(
-                        text = stringResource(R.string.library_book_pages, book.pageCount),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Slate,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun LibraryTabsRow(
-    selected: BookShelf,
-    onSelect: (BookShelf) -> Unit,
+    selected: LibraryShelf,
+    onSelect: (LibraryShelf) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        BookShelf.entries.forEach { shelf ->
+        LibraryShelf.entries.forEach { shelf ->
             val isActive = shelf == selected
             val label =
                 when (shelf) {
-                    BookShelf.READING -> stringResource(R.string.library_tab_reading)
-                    BookShelf.FINISHED -> stringResource(R.string.library_tab_finished)
-                    BookShelf.WISH -> stringResource(R.string.library_tab_wish)
+                    LibraryShelf.READING -> stringResource(R.string.library_tab_reading)
+                    LibraryShelf.FINISHED -> stringResource(R.string.library_tab_finished)
+                    LibraryShelf.WISH -> stringResource(R.string.library_tab_wish)
                 }
 
             val shape = RoundedCornerShape(RadiusPill)
@@ -220,16 +155,16 @@ private fun LibraryTabsRow(
 
 @Composable
 private fun LibraryEmptyState(
-    shelf: BookShelf,
+    shelf: LibraryShelf,
     modifier: Modifier = Modifier,
 ) {
     val (titleRes, bodyRes) =
         when (shelf) {
-            BookShelf.READING ->
+            LibraryShelf.READING ->
                 R.string.library_empty_reading_title to R.string.library_empty_reading_body
-            BookShelf.FINISHED ->
+            LibraryShelf.FINISHED ->
                 R.string.library_empty_finished_title to R.string.library_empty_finished_body
-            BookShelf.WISH ->
+            LibraryShelf.WISH ->
                 R.string.library_empty_wish_title to R.string.library_empty_wish_body
         }
 
@@ -268,6 +203,6 @@ private fun LibraryEmptyState(
 @Composable
 private fun LibraryScreenPreview() {
     BookTrackerTheme {
-        LibraryScreen(books = emptyList())
+        LibraryScreen()
     }
 }

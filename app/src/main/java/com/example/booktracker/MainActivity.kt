@@ -17,11 +17,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,10 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.booktracker.data.model.Book
-import com.example.booktracker.ui.MainViewModel
-import com.example.booktracker.ui.addbook.AddBookScreen
 import com.example.booktracker.ui.book.BookDetailScreen
 import com.example.booktracker.ui.home.HomeScreen
 import com.example.booktracker.ui.library.LibraryScreen
@@ -47,28 +41,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BookTrackerTheme {
-                val vm: MainViewModel = viewModel()
-                val books by vm.books.collectAsState()
-                val readingBooks by vm.readingBooks.collectAsState()
-
                 var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-                var addBookOpen by rememberSaveable { mutableStateOf(false) }
-                var selectedBook by remember { mutableStateOf<Book?>(null) }
+                var bookDetailOpen by rememberSaveable { mutableStateOf(false) }
 
                 LaunchedEffect(selectedTab) {
                     if (selectedTab != 1) {
-                        selectedBook = null
+                        bookDetailOpen = false
                     }
                 }
 
-                val atBookDetail = selectedTab == 1 && selectedBook != null
-                val showChrome = !atBookDetail && !addBookOpen
+                val atBookDetail = selectedTab == 1 && bookDetailOpen
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = MaterialTheme.colorScheme.background,
                     bottomBar = {
-                        if (showChrome) {
+                        if (!atBookDetail) {
                             MainNavigationBar(
                                 selectedIndex = selectedTab,
                                 onSelectTab = { selectedTab = it },
@@ -76,9 +64,9 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     floatingActionButton = {
-                        if (showChrome && (selectedTab == 0 || selectedTab == 1)) {
+                        if (!atBookDetail && (selectedTab == 0 || selectedTab == 1)) {
                             FloatingActionButton(
-                                onClick = { addBookOpen = true },
+                                onClick = { /* добавление — позже */ },
                                 containerColor = Accent,
                                 contentColor = Sage,
                             ) {
@@ -91,40 +79,23 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                 ) { padding ->
-                    when {
-                        addBookOpen ->
-                            AddBookScreen(
-                                onBack = { addBookOpen = false },
-                                onSave = { book ->
-                                    vm.addBook(book)
-                                    addBookOpen = false
-                                    selectedTab = 1
-                                },
-                                contentPadding = padding,
-                            )
-
-                        selectedTab == 0 ->
+                    when (selectedTab) {
+                        0 ->
                             HomeScreen(
-                                readingBooks = readingBooks,
-                                onOpenBook = { book ->
-                                    selectedBook = book
-                                    selectedTab = 1
-                                },
                                 contentPadding = padding,
                             )
 
-                        selectedTab == 1 ->
-                            if (selectedBook != null) {
+                        1 ->
+                            if (bookDetailOpen) {
                                 BookDetailScreen(
-                                    book = selectedBook!!,
-                                    onBack = { selectedBook = null },
+                                    onBack = { bookDetailOpen = false },
                                     contentPadding = padding,
                                 )
                             } else {
                                 LibraryScreen(
-                                    books = books,
                                     contentPadding = padding,
-                                    onOpenBookDetail = { book -> selectedBook = book },
+                                    onOpenBookDetail = { bookDetailOpen = true },
+                                    showBookDetailShortcut = true,
                                 )
                             }
 

@@ -20,8 +20,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,8 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.booktracker.R
-import com.example.booktracker.data.model.Book
-import com.example.booktracker.ui.common.CoverImage
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
 import com.example.booktracker.ui.theme.Ink
@@ -53,7 +51,6 @@ private val CoverHeight = 180.dp
 
 @Composable
 fun BookDetailScreen(
-    book: Book,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -79,26 +76,11 @@ fun BookDetailScreen(
         }
 
         item {
-            BookHeroSection(
-                book = book,
-                modifier = Modifier.padding(horizontal = 20.dp),
-            )
-        }
-
-        if (!book.description.isNullOrBlank()) {
-            item {
-                DescriptionCard(
-                    description = book.description,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
+            BookHeroSection(modifier = Modifier.padding(horizontal = 20.dp))
         }
 
         item {
-            ProgressCard(
-                pageCount = book.pageCount,
-                modifier = Modifier.padding(horizontal = 20.dp),
-            )
+            ProgressCard(modifier = Modifier.padding(horizontal = 20.dp))
         }
 
         item {
@@ -116,104 +98,52 @@ fun BookDetailScreen(
 }
 
 @Composable
-private fun BookHeroSection(
-    book: Book,
-    modifier: Modifier = Modifier,
-) {
+private fun BookHeroSection(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val coverModifier =
-            Modifier
-                .width(CoverWidth)
-                .height(CoverHeight)
-                .clip(RoundedCornerShape(RadiusSm))
-
-        if (book.coverUri != null) {
-            CoverImage(
-                uri = book.coverUri,
-                modifier = coverModifier,
-                contentDescription = book.title,
-            )
-        } else {
-            Box(
-                modifier = coverModifier.background(Brush.linearGradient(listOf(Ink, Accent))),
-            )
-        }
-
+        Box(
+            modifier =
+                Modifier
+                    .width(CoverWidth)
+                    .height(CoverHeight)
+                    .clip(RoundedCornerShape(RadiusSm))
+                    .background(Brush.linearGradient(listOf(Ink, Accent))),
+        )
         Spacer(Modifier.height(16.dp))
-
         Text(
-            text = book.title,
+            text = stringResource(R.string.book_detail_title_placeholder),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
         )
         Text(
-            text = book.author,
+            text = stringResource(R.string.book_detail_author_placeholder),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 6.dp),
             textAlign = TextAlign.Center,
         )
-
-        val pagesText = book.pageCount?.let { stringResource(R.string.library_book_pages, it) }
-        val isbnText = book.isbn?.let { "ISBN: $it" }
-        val metaParts = listOfNotNull(pagesText, isbnText)
-
-        if (metaParts.isNotEmpty()) {
-            Box(
-                modifier =
-                    Modifier
-                        .padding(top = 12.dp)
-                        .clip(RoundedCornerShape(RadiusPill))
-                        .background(TealSoft)
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-            ) {
-                Text(
-                    text = metaParts.joinToString(" · "),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Ink,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DescriptionCard(
-    description: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(RadiusMd),
-        colors = CardDefaults.cardColors(containerColor = Sage),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
-    ) {
-        Column(Modifier.padding(16.dp)) {
+        Box(
+            modifier =
+                Modifier
+                    .padding(top = 12.dp)
+                    .clip(RoundedCornerShape(RadiusPill))
+                    .background(TealSoft)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+        ) {
             Text(
-                text = stringResource(R.string.book_description_section),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 8.dp),
+                text = stringResource(R.string.book_detail_meta_placeholder),
+                style = MaterialTheme.typography.labelMedium,
+                color = Ink,
             )
         }
     }
 }
 
 @Composable
-private fun ProgressCard(
-    pageCount: Int?,
-    modifier: Modifier = Modifier,
-) {
+private fun ProgressCard(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(RadiusMd),
@@ -265,15 +195,8 @@ private fun ProgressCard(
                 )
             }
 
-            val hint =
-                if (pageCount != null) {
-                    stringResource(R.string.book_progress_hint_with_pages, pageCount)
-                } else {
-                    stringResource(R.string.book_progress_empty_hint)
-                }
-
             Text(
-                text = hint,
+                text = stringResource(R.string.book_progress_empty_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -416,16 +339,6 @@ private fun NotesCard(modifier: Modifier = Modifier) {
 @Composable
 private fun BookDetailScreenPreview() {
     BookTrackerTheme {
-        BookDetailScreen(
-            book =
-                Book(
-                    title = "Мастер и Маргарита",
-                    author = "М. Булгаков",
-                    pageCount = 480,
-                    isbn = "978-5-389-07455-6",
-                    description = "Роман о визите дьявола в Москву.",
-                ),
-            onBack = {},
-        )
+        BookDetailScreen(onBack = {})
     }
 }
