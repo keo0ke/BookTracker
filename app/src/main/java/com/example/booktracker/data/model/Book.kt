@@ -1,20 +1,16 @@
 package com.example.booktracker.data.model
 
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
-import java.util.UUID
-
 enum class BookShelf {
     READING,
     FINISHED,
     WISH,
 }
 
-@Entity(tableName = "books")
+/**
+ * Доменная модель книги. id = 0 для ещё не сохранённой на сервере книги.
+ */
 data class Book(
-    @PrimaryKey
-    val id: String = UUID.randomUUID().toString(),
+    val id: Long = 0L,
     val title: String,
     val author: String,
     val isbn: String? = null,
@@ -23,9 +19,7 @@ data class Book(
     val currentPage: Int = 0,
     val description: String? = null,
     val shelf: String = BookShelf.WISH.name,
-    val createdAt: Long = System.currentTimeMillis(),
 ) {
-    @get:Ignore
     val bookShelf: BookShelf
         get() = try {
             BookShelf.valueOf(shelf)

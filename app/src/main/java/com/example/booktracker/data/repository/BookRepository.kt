@@ -1,21 +1,42 @@
 package com.example.booktracker.data.repository
 
-import com.example.booktracker.data.local.BookDao
 import com.example.booktracker.data.model.Book
-import com.example.booktracker.data.model.BookShelf
-import kotlinx.coroutines.flow.Flow
+import com.example.booktracker.data.remote.BookTrackerApi
+import com.example.booktracker.data.remote.dto.BookRequestDto
+import com.example.booktracker.data.remote.dto.BookResponseDto
 
-class BookRepository(private val dao: BookDao) {
+class BookRepository(private val api: BookTrackerApi) {
 
-    fun observeAllBooks(): Flow<List<Book>> = dao.observeAll()
+    suspend fun getAll(): List<Book> = api.getBooks().map { it.toDomain() }
 
-    fun observeReadingBooks(): Flow<List<Book>> = dao.observeByShelf(BookShelf.READING.name)
+    suspend fun create(book: Book): Book =
+        api.createBook(book.toRequestDto()).toDomain()
 
-    suspend fun getBook(id: String): Book? = dao.getById(id)
+    suspend fun update(book: Book): Book =
+        api.updateBook(book.id, book.toRequestDto()).toDomain()
 
-    suspend fun addBook(book: Book) = dao.insert(book)
-
-    suspend fun updateBook(book: Book) = dao.update(book)
-
-    suspend fun deleteBook(book: Book) = dao.delete(book)
+    suspend fun delete(id: Long) = api.deleteBook(id)
 }
+
+private fun Book.toRequestDto(): BookRequestDto = BookRequestDto(
+    title = title,
+    author = author.ifBlank { null },
+    description = description,
+    shelf = shelf,
+    pageCount = pageCount,
+    currentPage = currentPage,
+    isbn = isbn,
+    coverUri = coverUri,
+)
+
+private fun BookResponseDto.toDomain(): Book = Book(
+    id = id,
+    title = title,
+    author = author.orEmpty(),
+    description = description,
+    shelf = shelf ?: "WISH",
+    pageCount = pageCount,
+    currentPage = currentPage ?: 0,
+    isbn = isbn,
+    coverUri = coverUri,
+)

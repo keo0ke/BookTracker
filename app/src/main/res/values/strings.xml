@@ -57,4 +57,13 @@
     <string name="add_book_cover_description">Обложка книги</string>
     <string name="add_book_field_required">Обязательное поле</string>
     <string name="add_book_save">Сохранить</string>
+
+    <!-- Словарные карточки -->
+    <string name="cards_section_title">Словарь</string>
+    <string name="cards_empty_hint">Добавьте незнакомые слова или фразы из книги.</string>
+    <string name="cards_field_term">Слово или фраза</string>
+    <string name="cards_field_definition">Перевод / значение</string>
+    <string name="cards_field_context">Контекст (необязательно)</string>
+    <string name="cards_add_button">Добавить карточку</string>
+    <string name="cards_delete">Удалить</string>
 </resources>
