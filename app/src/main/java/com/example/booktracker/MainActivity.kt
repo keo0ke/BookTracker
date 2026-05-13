@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -32,6 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.booktracker.data.model.Book
 import com.example.booktracker.data.model.BookShelf
+import com.example.booktracker.data.model.DictionaryCard
+import com.example.booktracker.data.remote.ServiceLocator
+import com.example.booktracker.ui.auth.AuthScreen
+import com.example.booktracker.ui.profile.ProfileScreen
 import com.example.booktracker.ui.MainViewModel
 import com.example.booktracker.ui.addbook.AddBookScreen
 import com.example.booktracker.ui.book.BookDetailScreen
@@ -48,109 +53,144 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BookTrackerTheme {
-                val vm: MainViewModel = viewModel()
-                val books by vm.books.collectAsState()
-                val readingBooks by vm.readingBooks.collectAsState()
-
-                var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-                var addBookOpen by rememberSaveable { mutableStateOf(false) }
-                var selectedBook by remember { mutableStateOf<Book?>(null) }
-
-                LaunchedEffect(selectedTab) {
-                    if (selectedTab != 1) {
-                        selectedBook = null
-                    }
+                val isLoggedIn by produceState<Boolean?>(initialValue = null) {
+                    ServiceLocator.authRepository.isLoggedInFlow.collect { value = it }
                 }
 
-                val atBookDetail = selectedTab == 1 && selectedBook != null
-                val showChrome = !atBookDetail && !addBookOpen
+                when (isLoggedIn) {
+                    null -> Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) { /* пустой экран загрузки */ }
+                    false -> AuthScreen()
+                    true -> MainContent()
+                }
+            }
+        }
+    }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background,
-                    bottomBar = {
-                        if (showChrome) {
-                            MainNavigationBar(
-                                selectedIndex = selectedTab,
-                                onSelectTab = { selectedTab = it },
-                            )
-                        }
-                    },
-                    floatingActionButton = {
-                        if (showChrome && (selectedTab == 0 || selectedTab == 1)) {
-                            FloatingActionButton(
-                                onClick = { addBookOpen = true },
-                                containerColor = Accent,
-                                contentColor = Sage,
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_fab_add),
-                                    contentDescription =
-                                        stringResource(R.string.fab_add_content_description),
-                                )
-                            }
-                        }
-                    },
-                ) { padding ->
-                    when {
-                        addBookOpen ->
-                            AddBookScreen(
-                                onBack = { addBookOpen = false },
-                                onSave = { book ->
-                                    vm.addBook(book)
-                                    addBookOpen = false
-                                    selectedTab = 1
-                                },
-                                contentPadding = padding,
-                            )
+    @Composable
+    private fun MainContent() {
+        val vm: MainViewModel = viewModel()
+        val books by vm.books.collectAsState()
+        val readingBooks by vm.readingBooks.collectAsState()
 
-                        selectedTab == 0 ->
-                            HomeScreen(
-                                readingBooks = readingBooks,
-                                onOpenBook = { book ->
-                                    selectedBook = book
-                                    selectedTab = 1
-                                },
-                                onAddBook = { addBookOpen = true },
-                                contentPadding = padding,
-                            )
+        var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+        var addBookOpen by rememberSaveable { mutableStateOf(false) }
+        var selectedBook by remember { mutableStateOf<Book?>(null) }
 
-                        selectedTab == 1 ->
-                            if (selectedBook != null) {
-                                BookDetailScreen(
-                                    book = selectedBook!!,
-                                    onBack = { selectedBook = null },
-                                    onStartReading = { book ->
-                                        val updated = book.copy(shelf = BookShelf.READING.name)
-                                        vm.updateBook(updated)
-                                        selectedBook = updated
-                                    },
-                                    contentPadding = padding,
-                                )
-                            } else {
-                                LibraryScreen(
-                                    books = books,
-                                    contentPadding = padding,
-                                    onOpenBookDetail = { book -> selectedBook = book },
-                                )
-                            }
+        val selectedBookId = selectedBook?.id
+        val cards by produceState(initialValue = emptyList<DictionaryCard>(), selectedBookId) {
+            value = emptyList()
+            selectedBookId?.let { id ->
+                vm.cardsFor(id).collect { value = it }
+            }
+        }
 
-                        else ->
-                            Box(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(padding),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.placeholder_screen_soon),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
+        LaunchedEffect(selectedTab) {
+            if (selectedTab != 1) {
+                selectedBook = null
+            }
+        }
+
+        val atBookDetail = selectedTab == 1 && selectedBook != null
+        val showChrome = !atBookDetail && !addBookOpen
+
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = MaterialTheme.colorScheme.background,
+            bottomBar = {
+                if (showChrome) {
+                    MainNavigationBar(
+                        selectedIndex = selectedTab,
+                        onSelectTab = { selectedTab = it },
+                    )
+                }
+            },
+            floatingActionButton = {
+                if (showChrome && (selectedTab == 0 || selectedTab == 1)) {
+                    FloatingActionButton(
+                        onClick = { addBookOpen = true },
+                        containerColor = Accent,
+                        contentColor = Sage,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_fab_add),
+                            contentDescription =
+                                stringResource(R.string.fab_add_content_description),
+                        )
                     }
                 }
+            },
+        ) { padding ->
+            when {
+                addBookOpen ->
+                    AddBookScreen(
+                        onBack = { addBookOpen = false },
+                        onSave = { book ->
+                            vm.addBook(book)
+                            addBookOpen = false
+                            selectedTab = 1
+                        },
+                        contentPadding = padding,
+                    )
+
+                selectedTab == 0 ->
+                    HomeScreen(
+                        readingBooks = readingBooks,
+                        onOpenBook = { book ->
+                            selectedBook = book
+                            selectedTab = 1
+                        },
+                        onAddBook = { addBookOpen = true },
+                        contentPadding = padding,
+                    )
+
+                selectedTab == 1 ->
+                    if (selectedBook != null) {
+                        BookDetailScreen(
+                            book = selectedBook!!,
+                            onBack = { selectedBook = null },
+                            onStartReading = { book ->
+                                val updated = book.copy(shelf = BookShelf.READING.name)
+                                vm.updateBook(updated)
+                                selectedBook = updated
+                            },
+                            cards = cards,
+                            onAddCard = { term, definition, context ->
+                                vm.addCard(selectedBook!!.id, term, definition, context)
+                            },
+                            onDeleteCard = { card -> vm.deleteCard(card) },
+                            contentPadding = padding,
+                        )
+                    } else {
+                        LibraryScreen(
+                            books = books,
+                            contentPadding = padding,
+                            onOpenBookDetail = { book -> selectedBook = book },
+                        )
+                    }
+
+                selectedTab == 3 ->
+                    ProfileScreen(
+                        onLogout = { vm.logout() },
+                        contentPadding = padding,
+                    )
+
+                else ->
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(padding),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.placeholder_screen_soon),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
             }
         }
     }
