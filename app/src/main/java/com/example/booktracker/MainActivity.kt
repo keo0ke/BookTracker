@@ -42,6 +42,7 @@ import com.example.booktracker.ui.addbook.AddBookScreen
 import com.example.booktracker.ui.book.BookDetailScreen
 import com.example.booktracker.ui.home.HomeScreen
 import com.example.booktracker.ui.library.LibraryScreen
+import com.example.booktracker.ui.stats.StatsScreen
 import com.example.booktracker.ui.theme.Accent
 import com.example.booktracker.ui.theme.BookTrackerTheme
 import com.example.booktracker.ui.theme.Sage
@@ -74,6 +75,7 @@ class MainActivity : ComponentActivity() {
         val vm: MainViewModel = viewModel()
         val books by vm.books.collectAsState()
         val readingBooks by vm.readingBooks.collectAsState()
+        val progress by vm.progress.collectAsState()
 
         var selectedTab by rememberSaveable { mutableIntStateOf(0) }
         var addBookOpen by rememberSaveable { mutableStateOf(false) }
@@ -156,6 +158,16 @@ class MainActivity : ComponentActivity() {
                                 vm.updateBook(updated)
                                 selectedBook = updated
                             },
+                            onRecordProgress = { page ->
+                                selectedBook?.let { current ->
+                                    vm.recordProgress(current, page)
+                                    selectedBook = current.copy(currentPage = page)
+                                }
+                            },
+                            onDeleteBook = {
+                                selectedBook?.let { vm.deleteBook(it) }
+                                selectedBook = null
+                            },
                             cards = cards,
                             onAddCard = { term, definition, context ->
                                 vm.addCard(selectedBook!!.id, term, definition, context)
@@ -170,6 +182,12 @@ class MainActivity : ComponentActivity() {
                             onOpenBookDetail = { book -> selectedBook = book },
                         )
                     }
+
+                selectedTab == 2 ->
+                    StatsScreen(
+                        progress = progress,
+                        contentPadding = padding,
+                    )
 
                 selectedTab == 3 ->
                     ProfileScreen(

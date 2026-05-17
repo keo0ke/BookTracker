@@ -31,10 +31,20 @@
     <string name="book_detail_back">← Назад</string>
     <string name="book_description_section">Описание</string>
     <string name="book_progress_section">Прогресс</string>
-    <string name="book_progress_empty_hint">Укажите текущую страницу и объём — здесь появятся проценты и средний темп.</string>
-    <string name="book_progress_hint_with_pages">Всего %d стр. — укажите текущую страницу, чтобы увидеть прогресс.</string>
+    <string name="book_progress_not_reading_hint">Нажмите «Начать читать», чтобы отмечать прогресс по страницам.</string>
+    <string name="book_progress_status">Прочитано: страница %1$d</string>
+    <string name="book_progress_status_with_total">Прочитано: %1$d из %2$d стр.</string>
+    <string name="book_progress_current_page">Текущая страница</string>
+    <string name="book_progress_too_big">Не больше %1$d стр. — это объём книги</string>
+    <string name="book_progress_too_small">Не меньше предыдущей отметки (%1$d стр.)</string>
+    <string name="book_progress_save">Сохранить прогресс</string>
     <string name="book_start_reading">Начать читать</string>
     <string name="book_already_reading">Вы читаете эту книгу</string>
+    <string name="book_delete_button">Удалить книгу</string>
+    <string name="book_delete_confirm_title">Удалить книгу?</string>
+    <string name="book_delete_confirm_message">Книга будет удалена вместе со всеми словарными карточками и историей прогресса. Это действие необратимо.</string>
+    <string name="book_delete_confirm">Удалить</string>
+    <string name="book_delete_cancel">Отмена</string>
 
     <string name="nav_home">Главная</string>
     <string name="nav_library">Библиотека</string>

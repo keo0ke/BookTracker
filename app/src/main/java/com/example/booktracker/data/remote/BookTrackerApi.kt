@@ -6,6 +6,8 @@ import com.example.booktracker.data.remote.dto.BookRequestDto
 import com.example.booktracker.data.remote.dto.BookResponseDto
 import com.example.booktracker.data.remote.dto.CardRequestDto
 import com.example.booktracker.data.remote.dto.CardResponseDto
+import com.example.booktracker.data.remote.dto.ProgressRequestDto
+import com.example.booktracker.data.remote.dto.ProgressResponseDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -50,4 +52,13 @@ interface BookTrackerApi {
         @Path("bookId") bookId: Long,
         @Path("cardId") cardId: Long,
     )
+
+    @POST("api/v1/books/{bookId}/progress")
+    suspend fun recordProgress(
+        @Path("bookId") bookId: Long,
+        @Body request: ProgressRequestDto,
+    ): ProgressResponseDto
+
+    @GET("api/v1/progress")
+    suspend fun getProgress(): List<ProgressResponseDto>
 }
