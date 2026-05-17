@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.booktracker.data.model.Book
 import com.example.booktracker.data.model.BookShelf
 import com.example.booktracker.data.model.DictionaryCard
+import com.example.booktracker.data.model.ProgressEntry
 import com.example.booktracker.data.remote.ServiceLocator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,6 +20,7 @@ class MainViewModel : ViewModel() {
 
     private val bookRepository = ServiceLocator.bookRepository
     private val cardRepository = ServiceLocator.cardRepository
+    private val progressRepository = ServiceLocator.progressRepository
     private val authRepository = ServiceLocator.authRepository
 
     private val _books = MutableStateFlow<List<Book>>(emptyList())
@@ -30,16 +32,22 @@ class MainViewModel : ViewModel() {
 
     private val _cardsByBook = MutableStateFlow<Map<Long, List<DictionaryCard>>>(emptyMap())
 
+    /** История изменений прогресса чтения (для экрана статистики). */
+    private val _progress = MutableStateFlow<List<ProgressEntry>>(emptyList())
+    val progress: StateFlow<List<ProgressEntry>> = _progress.asStateFlow()
+
     init {
-        // Слушаем флоу логина: вошли — грузим книги текущего юзера, вышли — чистим state.
+        // Слушаем флоу логина: вошли — грузим данные текущего юзера, вышли — чистим state.
         // Так при смене аккаунта данные всегда соответствуют действующему JWT.
         viewModelScope.launch {
             authRepository.isLoggedInFlow.collect { loggedIn ->
                 if (loggedIn) {
                     refreshBooks()
+                    refreshProgress()
                 } else {
                     _books.value = emptyList()
                     _cardsByBook.value = emptyMap()
+                    _progress.value = emptyList()
                 }
             }
         }
@@ -50,6 +58,28 @@ class MainViewModel : ViewModel() {
             runCatching { bookRepository.getAll() }
                 .onSuccess { _books.value = it }
                 .onFailure { Log.e(TAG, "getAll books failed", it) }
+        }
+    }
+
+    fun refreshProgress() {
+        viewModelScope.launch {
+            runCatching { progressRepository.getAll() }
+                .onSuccess { _progress.value = it }
+                .onFailure { Log.e(TAG, "getProgress failed", it) }
+        }
+    }
+
+    /** Записывает текущую прочитанную страницу: на сервер + в историю + обновляет книгу локально. */
+    fun recordProgress(book: Book, page: Int) {
+        viewModelScope.launch {
+            runCatching { progressRepository.record(book.id, page) }
+                .onSuccess { entry ->
+                    _progress.value = listOf(entry) + _progress.value
+                    _books.value = _books.value.map {
+                        if (it.id == book.id) it.copy(currentPage = page) else it
+                    }
+                }
+                .onFailure { Log.e(TAG, "recordProgress failed", it) }
         }
     }
 
@@ -71,12 +101,14 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    /** Удаляет книгу вместе со словарными карточками и историей прогресса. */
     fun deleteBook(book: Book) {
         viewModelScope.launch {
             runCatching { bookRepository.delete(book.id) }
                 .onSuccess {
                     _books.value = _books.value.filter { it.id != book.id }
                     _cardsByBook.value = _cardsByBook.value - book.id
+                    _progress.value = _progress.value.filter { it.bookId != book.id }
                 }
                 .onFailure { Log.e(TAG, "delete book failed", it) }
         }

@@ -16,17 +16,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,6 +68,8 @@ fun BookDetailScreen(
     book: Book,
     onBack: () -> Unit,
     onStartReading: (Book) -> Unit,
+    onRecordProgress: (page: Int) -> Unit,
+    onDeleteBook: () -> Unit,
     cards: List<DictionaryCard>,
     onAddCard: (term: String, definition: String, context: String?) -> Unit,
     onDeleteCard: (DictionaryCard) -> Unit,
@@ -68,6 +77,34 @@ fun BookDetailScreen(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val isReading = book.bookShelf == BookShelf.READING
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.book_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.book_delete_confirm_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeleteBook()
+                    },
+                ) {
+                    Text(
+                        text = stringResource(R.string.book_delete_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.book_delete_cancel))
+                }
+            },
+            containerColor = Sage,
+        )
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -120,7 +157,13 @@ fun BookDetailScreen(
             item { DescriptionCard(book.description, Modifier.padding(horizontal = 20.dp)) }
         }
 
-        item { ProgressCard(book.pageCount, Modifier.padding(horizontal = 20.dp)) }
+        item {
+            ProgressCard(
+                book = book,
+                onRecordProgress = onRecordProgress,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
+        }
 
         item {
             CardsSection(
@@ -129,6 +172,26 @@ fun BookDetailScreen(
                 onDeleteCard = onDeleteCard,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
+        }
+
+        item {
+            OutlinedButton(
+                onClick = { showDeleteDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(RadiusMd),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
+            ) {
+                Text(
+                    text = stringResource(R.string.book_delete_button),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(vertical = 4.dp),
+                )
+            }
         }
 
         item { Spacer(Modifier.height(24.dp)) }
@@ -216,7 +279,11 @@ private fun DescriptionCard(description: String, modifier: Modifier = Modifier) 
 }
 
 @Composable
-private fun ProgressCard(pageCount: Int?, modifier: Modifier = Modifier) {
+private fun ProgressCard(
+    book: Book,
+    onRecordProgress: (page: Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(RadiusMd),
@@ -225,31 +292,126 @@ private fun ProgressCard(pageCount: Int?, modifier: Modifier = Modifier) {
         border = BorderStroke(1.dp, Ink.copy(alpha = 0.12f)),
     ) {
         Column(Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Text(
+                text = stringResource(R.string.book_progress_section),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+
+            if (book.bookShelf != BookShelf.READING) {
                 Text(
-                    text = stringResource(R.string.book_progress_section),
-                    style = MaterialTheme.typography.labelSmall,
+                    text = stringResource(R.string.book_progress_not_reading_hint),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-
-            val hint = if (pageCount != null) {
-                stringResource(R.string.book_progress_hint_with_pages, pageCount)
             } else {
-                stringResource(R.string.book_progress_empty_hint)
+                ReadingProgressEditor(book = book, onRecordProgress = onRecordProgress)
             }
-
-            Text(
-                text = hint,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
         }
+    }
+}
+
+@Composable
+private fun ReadingProgressEditor(
+    book: Book,
+    onRecordProgress: (page: Int) -> Unit,
+) {
+    // Поле переинициализируется при смене книги или сохранённой страницы.
+    var pageInput by rememberSaveable(book.id, book.currentPage) {
+        mutableStateOf(book.currentPage.toString())
+    }
+    val enteredPage = pageInput.toIntOrNull()
+    val pageCount = book.pageCount
+
+    val statusText = if (pageCount != null) {
+        stringResource(R.string.book_progress_status_with_total, book.currentPage, pageCount)
+    } else {
+        stringResource(R.string.book_progress_status, book.currentPage)
+    }
+    Text(
+        text = statusText,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+
+    if (pageCount != null && pageCount > 0) {
+        val percent = (book.currentPage * 100 / pageCount).coerceIn(0, 100)
+        Spacer(Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { percent / 100f },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .clip(RoundedCornerShape(RadiusPill)),
+            color = Accent,
+            trackColor = TealSoft,
+        )
+        Text(
+            text = "$percent%",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+
+    Spacer(Modifier.height(12.dp))
+
+    // Новая отметка не может превышать объём книги и не может быть меньше предыдущей.
+    val tooBig = enteredPage != null && pageCount != null && enteredPage > pageCount
+    val tooSmall = enteredPage != null && enteredPage < book.currentPage
+    val isError = tooBig || tooSmall
+
+    OutlinedTextField(
+        value = pageInput,
+        onValueChange = { pageInput = it.filter { ch -> ch.isDigit() } },
+        label = { Text(stringResource(R.string.book_progress_current_page)) },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        isError = isError,
+        supportingText = when {
+            tooBig -> {
+                { Text(stringResource(R.string.book_progress_too_big, pageCount!!)) }
+            }
+            tooSmall -> {
+                { Text(stringResource(R.string.book_progress_too_small, book.currentPage)) }
+            }
+            else -> null
+        },
+        shape = RoundedCornerShape(RadiusSm),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = Accent,
+            unfocusedBorderColor = Ink.copy(alpha = 0.18f),
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            focusedLabelColor = Accent,
+            unfocusedLabelColor = Ink.copy(alpha = 0.45f),
+            cursorColor = Accent,
+            focusedContainerColor = Sage,
+            unfocusedContainerColor = Sage,
+        ),
+    )
+
+    Spacer(Modifier.height(8.dp))
+
+    val canSave = enteredPage != null && !isError && enteredPage != book.currentPage
+    Button(
+        onClick = { enteredPage?.let(onRecordProgress) },
+        enabled = canSave,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(RadiusMd),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Accent,
+            contentColor = Sage,
+            disabledContainerColor = TealSoft,
+            disabledContentColor = Slate,
+        ),
+    ) {
+        Text(
+            text = stringResource(R.string.book_progress_save),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(vertical = 4.dp),
+        )
     }
 }
 
@@ -433,6 +595,8 @@ private fun BookDetailScreenPreview() {
             ),
             onBack = {},
             onStartReading = {},
+            onRecordProgress = {},
+            onDeleteBook = {},
             cards = emptyList(),
             onAddCard = { _, _, _ -> },
             onDeleteCard = {},

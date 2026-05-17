@@ -5,6 +5,7 @@ import com.example.booktracker.data.local.TokenStore
 import com.example.booktracker.data.repository.AuthRepository
 import com.example.booktracker.data.repository.BookRepository
 import com.example.booktracker.data.repository.CardRepository
+import com.example.booktracker.data.repository.ProgressRepository
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -40,6 +41,8 @@ object ServiceLocator {
         private set
     lateinit var cardRepository: CardRepository
         private set
+    lateinit var progressRepository: ProgressRepository
+        private set
 
     fun init(context: Context) {
         if (initialized) return
@@ -74,6 +77,7 @@ object ServiceLocator {
 
             bookRepository = BookRepository(api)
             cardRepository = CardRepository(api)
+            progressRepository = ProgressRepository(api)
             authRepository = AuthRepository(api, tokenStore)
 
             initialized = true
