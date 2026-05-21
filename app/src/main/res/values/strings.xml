@@ -24,7 +24,6 @@
     <string name="library_empty_finished_body">Когда закончите чтение, отметьте книгу прочитанной — она окажется в этом разделе.</string>
     <string name="library_empty_wish_title">Список желаний пуст</string>
     <string name="library_empty_wish_body">Добавляйте сюда книги, которые планируете прочитать позже.</string>
-    <string name="library_link_book_detail">Карточка книги</string>
     <string name="library_book_pages">%d стр.</string>
 
     <!-- Карточка книги -->
