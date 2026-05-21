@@ -29,7 +29,6 @@ object ServiceLocator {
     private const val BASE_URL = "http://192.168.1.137:8080/"
 
     @Volatile private var initialized = false
-    private lateinit var appContext: Context
 
     lateinit var tokenStore: TokenStore
         private set
@@ -48,8 +47,7 @@ object ServiceLocator {
         if (initialized) return
         synchronized(this) {
             if (initialized) return
-            appContext = context.applicationContext
-            tokenStore = TokenStore(appContext)
+            tokenStore = TokenStore(context.applicationContext)
 
             val json = Json {
                 ignoreUnknownKeys = true

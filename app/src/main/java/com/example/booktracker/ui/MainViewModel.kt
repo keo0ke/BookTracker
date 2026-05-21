@@ -132,7 +132,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun addCard(bookId: Long, term: String, definition: String, context: String? = null) {
+    fun addCard(bookId: Long, term: String, definition: String, context: String?) {
         val trimmedTerm = term.trim()
         val trimmedDefinition = definition.trim()
         if (trimmedTerm.isEmpty() || trimmedDefinition.isEmpty()) return

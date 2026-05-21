@@ -21,9 +21,5 @@ data class Book(
     val shelf: String = BookShelf.WISH.name,
 ) {
     val bookShelf: BookShelf
-        get() = try {
-            BookShelf.valueOf(shelf)
-        } catch (_: IllegalArgumentException) {
-            BookShelf.WISH
-        }
+        get() = BookShelf.entries.firstOrNull { it.name == shelf } ?: BookShelf.WISH
 }
