@@ -1,10 +1,11 @@
 package com.example.booktracker.data.remote.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProgressRequestDto(
-    val page: Int,
+    @SerialName("page") val page: Int
 )
 
 @Serializable

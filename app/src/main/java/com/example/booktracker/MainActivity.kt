@@ -156,7 +156,8 @@ class MainActivity : ComponentActivity() {
                             onStartReading = { book ->
                                 val updated = book.copy(shelf = BookShelf.READING.name)
                                 vm.updateBook(updated)
-                                selectedBook = updated
+                                selectedBook = null
+                                selectedTab = 0
                             },
                             onRecordProgress = { page ->
                                 selectedBook?.let { current ->
