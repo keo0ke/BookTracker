@@ -1,6 +1,7 @@
 package com.example.booktracker.data.remote
 
 import android.content.Context
+import android.os.Build
 import com.example.booktracker.data.local.TokenStore
 import com.example.booktracker.data.repository.AuthRepository
 import com.example.booktracker.data.repository.BookRepository
@@ -15,18 +16,41 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
 /**
- * Простой ServiceLocator. Заменяет полноценный DI (Hilt) на ранней стадии.
- *
- * ВАЖНО: BASE_URL должен указывать на твой бэкенд.
- *  - Эмулятор Android: "http://10.0.2.2:8080/"
- *  - Реальный телефон в той же Wi-Fi сети: "http://<IPv4-адрес-ПК>:8080/"
- *    (узнать в Windows: cmd → ipconfig → IPv4 Address у Wi-Fi адаптера)
+ * Конфигурация сети для автоматического переключения между эмулятором и реальным устройством.
  */
-object ServiceLocator {
+object NetworkConfig {
+    private val isEmulator: Boolean
+        get() = (Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || Build.HARDWARE.contains("goldfish")
+                || Build.HARDWARE.contains("ranchu")
+                || Build.PRODUCT.contains("sdk_google")
+                || Build.PRODUCT.contains("google_sdk")
+                || Build.PRODUCT.contains("sdk_gphone")
+                || Build.PRODUCT.contains("sdk_x86")
+                || Build.PRODUCT.contains("emulator")
+                || Build.PRODUCT.contains("simulator"))
 
-    // IP компьютера в локальной Wi-Fi сети. Если IP сменится — поменяй тут.
-    // Эмулятор Android вместо этого использует "http://10.0.2.2:8080/".
-    private const val BASE_URL = "http://192.168.1.137:8080/"
+    val baseUrl: String
+        get() = if (isEmulator) {
+            "http://10.0.2.2:8080/" // Для любой виртуалки
+        } else {
+            // ЕСЛИ НУЖНО ПРОВЕРИТЬ НА РЕАЛЬНОМ ТЕЛЕФОНЕ МЕНЯЕМ АЙПИ ПО Wi-Fi!!! НИЖЕ
+            //Как найти Айпи? Для Win:
+            // 1.Win+R
+            // 2. Пишем cmd
+            // 3. CMD пишем ipconfig
+            // 4. Локальный адрес указан в строке IPv4-адрес
+            // Вставляем его НИЖЕ!!!
+            "http://192.168.1.137:8080/"
+        }
+}
+
+object ServiceLocator {
 
     @Volatile private var initialized = false
 
@@ -66,7 +90,8 @@ object ServiceLocator {
                 .build()
 
             val retrofit = Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                // Используем динамический URL из NetworkConfig
+                .baseUrl(NetworkConfig.baseUrl)
                 .client(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
                 .build()

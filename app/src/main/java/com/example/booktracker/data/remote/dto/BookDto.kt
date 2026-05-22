@@ -7,7 +7,7 @@ data class BookRequestDto(
     val title: String,
     val author: String? = null,
     val description: String? = null,
-    val shelf: String? = null,
+    val shelf: String,
     val pageCount: Int? = null,
     val currentPage: Int? = null,
     val isbn: String? = null,

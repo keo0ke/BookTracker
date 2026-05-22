@@ -238,6 +238,12 @@ fun AddBookScreen(
                     titleError = title.isBlank()
                     authorError = author.isBlank()
                     if (canSave) {
+                        val serverShelf = when (BookShelf.entries[selectedShelf]) {
+                            BookShelf.READING -> "READING"
+                            BookShelf.FINISHED -> "FINISHED"
+                            BookShelf.WISH -> "PLAN"
+                        }
+
                         onSave(
                             Book(
                                 title = title.trim(),
@@ -246,7 +252,7 @@ fun AddBookScreen(
                                 coverUri = coverUri,
                                 pageCount = pageCount.toIntOrNull(),
                                 description = description.trim().ifBlank { null },
-                                shelf = BookShelf.entries[selectedShelf].name,
+                                shelf = serverShelf,
                             ),
                         )
                     }
