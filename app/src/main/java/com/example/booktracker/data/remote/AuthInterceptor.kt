@@ -26,7 +26,6 @@ class AuthInterceptor(private val tokenStore: TokenStore) : Interceptor {
 
         val response = chain.proceed(finalRequest)
 
-        // Если сервер сказал что токен невалиден — чистим его, фронт автоматом откроет AuthScreen.
         if (needsAuth && (response.code == 401 || response.code == 403)) {
             runBlocking { tokenStore.clear() }
         }

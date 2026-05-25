@@ -72,12 +72,17 @@ class MainViewModel : ViewModel() {
     /** Записывает текущую прочитанную страницу: на сервер + в историю + обновляет книгу локально. */
 
     fun recordProgress(book: Book, page: Int) {
+        if (page < 0) return // Защита от отрицательных чисел
+
         viewModelScope.launch {
-            // Убираем runCatching, чтобы увидеть реальную ошибку
-            val entry = progressRepository.record(book.id, page)
-            _progress.value = listOf(entry) + _progress.value
-            _books.value = _books.value.map {
-                if (it.id == book.id) it.copy(currentPage = page) else it
+            try {
+                val entry = progressRepository.record(book.id, page)
+                _progress.value = listOf(entry) + _progress.value
+                _books.value = _books.value.map {
+                    if (it.id == book.id) it.copy(currentPage = page) else it
+                }
+            } catch (e: Exception) {
+                Log.e("DEBUG_PROGRESS", "Ошибка: ${e.message}")
             }
         }
     }

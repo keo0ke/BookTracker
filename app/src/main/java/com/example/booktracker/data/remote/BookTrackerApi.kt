@@ -56,7 +56,7 @@ interface BookTrackerApi {
     @POST("api/v1/books/{bookId}/progress")
     suspend fun recordProgress(
         @Path("bookId") bookId: Long,
-        @Body request: ProgressRequestDto,
+        @Body request: ProgressRequestDto
     ): ProgressResponseDto
 
     @GET("api/v1/progress")
